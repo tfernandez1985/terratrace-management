@@ -1066,6 +1066,19 @@ async function exportKMZ(){
    if(geom.type==='GeometryCollection')return `<MultiGeometry>${(geom.geometries||[]).map(importedGeometry).join('')}</MultiGeometry>`;
    return '';
   };
+  // Google Earth displays this table when any imported feature is clicked.
+  // ExtendedData also keeps each original source field machine-readable.
+  const importedAttributeMarkup=(properties)=>{
+   const attributes=cleanKMZAttributes(properties||{});
+   const entries=Object.entries(attributes).filter(([key,value])=>
+    !key.startsWith('_')&&key.toLowerCase()!=='description'&&value!==null&&value!==undefined&&String(value).trim()!=='');
+   if(!entries.length)return '';
+   const valueText=value=>typeof value==='object'?JSON.stringify(value):String(value);
+   const rows=entries.map(([key,value])=>`<tr><th style="text-align:left;vertical-align:top;padding:5px 9px;border:1px solid #cad2d8;background:#edf2f5">${xml(key)}</th><td style="padding:5px 9px;border:1px solid #cad2d8;white-space:pre-wrap">${xml(valueText(value))}</td></tr>`).join('');
+   const table=`<div style="font:13px Arial,sans-serif;max-height:430px;overflow:auto"><table style="border-collapse:collapse;width:100%">${rows}</table></div>`;
+   const extended='<ExtendedData>'+entries.map(([key,value])=>`<Data name="${xml(key)}"><value>${xml(valueText(value))}</value></Data>`).join('')+'</ExtendedData>';
+   return `<description><![CDATA[${table.replace(/]]>/g,'] ]>')}]]></description>${extended}`;
+  };
   const importedFeatures=(obj)=>{
    if(!obj)return [];
    if(obj.type==='FeatureCollection')return obj.features||[];
@@ -1082,8 +1095,8 @@ async function exportKMZ(){
     const name=prop.name||prop.Name||`Imported Feature ${featureIndex+1}`;
     const color=kmlColorFromHex(prop._color||'#d2a9ff');
     const width=Math.max(0.5,Math.min(15,Number(prop._width)||2));
-    const description=prop.description||prop.Description||'';
-    parts.push(`<Placemark><name>${xml(name)}</name>${description?`<description>${xml(description)}</description>`:''}<Style><LineStyle><color>${color}</color><width>${width}</width></LineStyle><PolyStyle><color>${Math.round(Math.max(0,Math.min(1,prop._fillOpacity??0.3))*255).toString(16).padStart(2,'0')+kmlColorFromHex(prop._fillColor||prop._color||'#d2a9ff').slice(2)}</color><fill>${prop._fillEnabled===false?0:1}</fill><outline>${prop._outlineEnabled===false?0:1}</outline></PolyStyle><IconStyle><scale>0.45</scale><Icon><href>icons/cadPoint.png</href></Icon></IconStyle><LabelStyle><scale>0</scale></LabelStyle></Style>${geom}</Placemark>`);
+    const attributeMarkup=importedAttributeMarkup(prop);
+    parts.push(`<Placemark><name>${xml(name)}</name>${attributeMarkup}<Style><LineStyle><color>${color}</color><width>${width}</width></LineStyle><PolyStyle><color>${Math.round(Math.max(0,Math.min(1,prop._fillOpacity??0.3))*255).toString(16).padStart(2,'0')+kmlColorFromHex(prop._fillColor||prop._color||'#d2a9ff').slice(2)}</color><fill>${prop._fillEnabled===false?0:1}</fill><outline>${prop._outlineEnabled===false?0:1}</outline></PolyStyle><IconStyle><scale>0.45</scale><Icon><href>icons/cadPoint.png</href></Icon></IconStyle><LabelStyle><scale>0</scale></LabelStyle></Style>${geom}</Placemark>`);
    });
    parts.push('</Folder>');
   });
