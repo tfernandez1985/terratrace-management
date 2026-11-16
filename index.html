@@ -226,8 +226,8 @@ function setupPolygonHold(){
   const p=f.properties||{},name=p.name||p.Name||p.NAME||p.CAD_LAYER||'Imported KMZ feature';
   const rows=kmzAttributeRows(p);
   const details=rows.map(([key,value])=>'<div style="padding:5px 0;border-bottom:1px solid #52616a55"><b>'+esc(key)+'</b><div style="white-space:pre-wrap;overflow-wrap:anywhere">'+esc(typeof value==='object'?JSON.stringify(value):String(value))+'</div></div>').join('');
-  const html='<div style="min-width:200px;max-width:290px;max-height:300px;overflow:auto;color:#1b2630"><b style="font-size:15px">'+esc(name)+'</b><div style="margin-top:8px">'+(details||'No additional attributes in this file.')+'</div><small style="display:block;margin-top:10px;color:#52616a">Right-click or press and hold to change this feature color.</small></div>';
-  L.popup({maxWidth:320,autoPan:true}).setLatLng(position).setContent(html).openOn(map);
+  const html='<div style="min-width:520px;max-width:760px;max-height:420px;overflow:auto;color:#1b2630"><b style="font-size:15px">'+esc(name)+'</b><div style="margin-top:8px">'+(details||'No additional attributes in this file.')+'</div><small style="display:block;margin-top:10px;color:#52616a">Right-click or press and hold to change this feature color.</small></div>';
+  L.popup({maxWidth:800,autoPan:true}).setLatLng(position).setContent(html).openOn(map);
  };
   ttPickImportedFeature=pickFeature;ttShowImportedAttributes=showAttributes;ttImportedTapSuppressed=()=>Date.now()<suppressTapUntil;
  map.on('click',e=>{if(state.mode!=='select'||Date.now()<suppressTapUntil)return;const f=pickFeature(map.latLngToContainerPoint(e.latlng));if(f)showAttributes(f,e.latlng)});
@@ -1075,7 +1075,7 @@ async function exportKMZ(){
    if(!entries.length)return '';
    const valueText=value=>typeof value==='object'?JSON.stringify(value):String(value);
    const rows=entries.map(([key,value])=>`<tr><th style="text-align:left;vertical-align:top;padding:5px 9px;border:1px solid #cad2d8;background:#edf2f5">${xml(key)}</th><td style="padding:5px 9px;border:1px solid #cad2d8;white-space:pre-wrap">${xml(valueText(value))}</td></tr>`).join('');
-   const table=`<div style="font:13px Arial,sans-serif;max-height:430px;overflow:auto"><table style="border-collapse:collapse;width:100%">${rows}</table></div>`;
+   const table=`<div style="font:13px Arial,sans-serif;min-width:760px;max-width:980px;max-height:430px;overflow:auto"><table style="border-collapse:collapse;width:100%;table-layout:auto">${rows}</table></div>`;
    const extended='<ExtendedData>'+entries.map(([key,value])=>`<Data name="${xml(key)}"><value>${xml(valueText(value))}</value></Data>`).join('')+'</ExtendedData>';
    return `<description><![CDATA[${table.replace(/]]>/g,'] ]>')}]]></description>${extended}`;
   };
