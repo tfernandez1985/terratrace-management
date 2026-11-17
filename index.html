@@ -16,7 +16,18 @@
 #importedLayerList .tt-kmz-layer{display:flex;align-items:center;gap:9px;padding:7px 9px;border-top:1px solid #233a49;min-width:0}
 #importedLayerList .tt-kmz-layer span{flex:1;min-width:0;overflow-wrap:anywhere;font-size:11px}
 #importedLayerList .tt-kmz-layer input[type=color]{width:40px;min-width:40px;height:30px;padding:2px}
-</style><script>window.TT_CONFIG=Object.freeze({projectApi:'https://terratrace-api.supersurveyor1985.workers.dev',gisApi:'https://terratrace-gis-api.supersurveyor1985.workers.dev',defaultProject:'PICKTON_TRUNK',projectToken:'Mtf0213!?',gisToken:'5e950381c94dba6c9a9b4636ae817b45690eb6392f6fc088c8cb078bd8ad5346'});</script><script>window.ttVolatileStorage=(()=>{return {getItem:k=>null,setItem:(k,v)=>{},removeItem:k=>{}}})();</script></head><body><div id="map"></div><header><button id="menuBtn" class="btn">☰ Commands</button><h1>TerraTrace <b>Field Software</b></h1><div class="status" id="status">READY</div></header><aside class="drawer open" id="drawer"><h2>PROJECT MANAGER</h2><label>Current project</label><select id="projectSelect"></select><div class="flex"><button class="btn" id="newProject">＋ New Project</button><button class="btn" id="openLocalProject">Open Project</button></div><div class="flex"><button class="btn" id="renameProject">Rename</button><button class="btn" id="deleteProject">Delete Project</button></div><button class="btn primary" id="saveLocalProject">Save Local Copy</button><div class="note">Each project has its own geometry, photo pins, reference layers and coordinate system. Local projects must be exported to Files. Cloud projects open directly into memory and sync through Cloudflare. Use Backup ZIP to save a durable copy in On My iPad through Files. Safari website data is separate from Files storage.</div><h2>CLOUD PROJECTS — MANAGEMENT</h2><label>All cloud projects</label><select id="cloudProjectSelect"><option value="">Connect to load cloud projects</option></select><div class="flex"><button class="btn" id="cloudRefresh">↻ Refresh Projects</button><button class="btn primary" id="cloudOpen">Open Cloud Project</button></div><label style="display:none">Cloud API URL (Workers endpoint)</label><input style="display:none" id="cloudApi" value="https://terratrace-api.supersurveyor1985.workers.dev" placeholder="https://terratrace-cloud-api.YOU.workers.dev"><label style="display:none">Project ID</label><input style="display:none" id="cloudProjectId" value="TEST" placeholder="TEST"><label style="display:none">Project access token</label><input style="display:none" id="cloudToken" type="password" placeholder="Admin or viewer token"><div class="flex" style="display:none"><button class="btn" id="cloudConnect">Connect / Sync</button><button class="btn" id="cloudDisconnect">Disconnect</button></div><div class="flex"><button class="btn primary" id="cloudPublish">Publish Local to Cloud</button><button class="btn" id="cloudDownload">Download Project</button></div><div class="note" id="cloudStatus">Cloud disconnected. Cloud sync requires a deployed Worker. Cloud settings are built into this HTML file. Use only on trusted devices.</div><h2>PROJECT / COORDINATES</h2><label>Project coordinate system (EPSG)</label><select id="epsg"><option value="">Choose coordinate system</option><option value="2257">EPSG:2257 — New Mexico East — NAD83 (US ft)</option><option value="2258">EPSG:2258 — New Mexico Central — NAD83 (US ft)</option><option value="2259">EPSG:2259 — New Mexico West — NAD83 (US ft)</option><option value="2275">EPSG:2275 — Texas North — NAD83 (US ft)</option><option value="2276">EPSG:2276 — Texas North Central — NAD83 (US ft)</option><option value="2277">EPSG:2277 — Texas Central — NAD83 (US ft)</option><option value="2278">EPSG:2278 — Texas South Central — NAD83 (US ft)</option><option value="2279">EPSG:2279 — Texas South — NAD83 (US ft)</option><option value="26913">EPSG:26913 — UTM Zone 13N — NAD83 (meters)</option><option value="26914">EPSG:26914 — UTM Zone 14N — NAD83 (meters)</option><option value="32112">EPSG:32112 — New Mexico East — NAD83 (meters)</option><option value="32140">EPSG:32140 — Texas South Central — NAD83 (meters)</option></select><label>Custom PROJ4 (advanced)</label><input id="proj" placeholder="Paste PROJ4 definition for your State Plane zone"><div class="note">Choose the EPSG zone above, or supply a custom PROJ4 definition. Verify datum, zone and units against the survey control before importing.</div><div class="flex"><button class="btn" id="saveCrs">Apply CRS</button><button class="btn" id="gps">▶ Start Live GPS</button></div><label><input type="checkbox" id="gpsFollow" checked> Follow GPS position</label><div class="note" id="gpsStatus">GPS off · Requires location permission and HTTPS (or localhost).</div><button class="btn" id="gpsCenter">◎ Center on GPS</button><h2>IPAD STORAGE / BACKUPS</h2><div class="note">Projects stay in memory until you export them to the Files app. No browser project storage is used. For a durable copy outside Safari, export a ZIP and save it in the Files app.</div><button class="btn primary" id="ipadBackup">Backup ZIP to iPad Files</button><button class="btn" id="ipadRestore">Restore ZIP backup</button><div class="note" id="storageInfo">No Google Drive connection or sync. Save a ZIP or JSON to Files before closing TerraTrace; unsaved edits will be lost.</div><h2>DATA / IMPORT</h2><button class="btn" id="loadCL">Import ordered CL CSV</button><button class="btn" id="loadProject">Open saved project JSON</button><button class="btn" id="saveProject">Save project JSON</button><label>Public or signed GeoJSON URL (optional)</label><input id="geoUrl" placeholder="https://.../project.geojson"><button class="btn" id="fetchGeo">Load URL layer</button><div class="note">Import local GIS files using the iPad Files picker, or a CORS-enabled GeoJSON URL. Large SHP/GDB/GPKG may need a server-side tile service.</div><h2>GIS DATA HUB / CORRIDOR</h2><div id="pythonGISPanel" style="background:#0a111b;border:1px solid #365367;border-radius:8px;padding:10px;margin:6px 0 14px"><div style="color:#46dbef;font-weight:750;letter-spacing:1px">☁ CLOUDFLARE GIS · INDEXED FLATGEOBUF</div><div class="note" style="margin:5px 0">Search indexed FlatGeobuf files in Cloudflare R2 by GIS category and your selected corridor. No manual file selection or local GIS database required.</div><label style="display:none">GIS Cloudflare API URL</label><input style="display:none" id="pythonGISURL" value="https://terratrace-gis-api.supersurveyor1985.workers.dev" spellcheck="false" autocomplete="off"><label style="display:none">GIS Access Token (separate from Project Sync)</label><input style="display:none" id="pythonGISToken" type="password" placeholder="Enter the GIS Worker viewer/admin token" autocomplete="off" spellcheck="false"><div class="note">GIS and project sync use separate Cloudflare Workers and may have different tokens. Credentials are embedded in the HTML; restrict access to the deployed app. Rotate any previously exposed tokens.</div><div class="flex"><button class="btn primary" id="pythonGISConnect" type="button">↻ CONNECT GIS CATEGORIES</button></div><div class="note" id="pythonGISStatus">Connect GIS to load the available R2 FlatGeobuf categories.</div><div class="note" id="pythonGISSearchDetail" style="display:none;white-space:pre-wrap;overflow-wrap:anywhere;margin-top:8px;border-top:1px solid #284254;padding-top:8px"></div><div id="pythonGISCategories"></div><label><input id="pythonGISEnabled" type="checkbox" checked> Search Cloudflare FlatGeobuf GIS</label><div class="note">Select categories, then tap one KMZ/CAD alignment or one area center. Search uses the entire selected line or circular area at your radius.</div></div><button class="btn primary" id="gisLibrary" style="display:none">＋ Load GIS files from iPad</button><label>Buffer radius (feet, on all sides)</label><input type="number" id="gisRadius" value="1000" min="1" step="any"><button class="btn mode" data-mode="gisPickLine">⌁ Pick Line → Buffer</button><button class="btn mode" data-mode="gisPickArea">▧ Pick Area → Buffer</button><div class="note">Pick Line: tap any part of a project KMZ / CAD line to select its entire alignment. Pick Area: tap one location to search a circular area using the buffer radius. Select categories and search.</div><div style="display:none" id="gisCategoryList" class="note"></div><div style="display:none" id="gisDatasetList" class="note">No additional source files loaded.</div><button class="btn primary" id="gisExtract">SEARCH CHECKED GIS IN BUFFER</button><div id="gisLoadedCategories" style="margin:10px 0;padding:10px;background:#0c151b;border:1px solid #365367;border-radius:8px"><div style="color:#56d9ef;font-weight:750;letter-spacing:1px">LOADED GIS LAYERS</div><div class="note">Show, hide, or remove GIS results by category. This affects this project only, not your Cloudflare R2 source files.</div><div id="gisLoadedCategoryRows" class="note" style="margin-top:8px">No GIS search results loaded.</div></div><button class="btn" style="display:none" id="gisClearLibrary">Clear loaded GIS library</button><button class="btn" style="display:none" id="gisClearPackages">Remove registered regional ZIPs</button><h2>KMZ CENTERLINE / PI EXPORT</h2><button class="btn primary mode" data-mode="exportKmzCL">⌁ EXPORT CL — Pick KMZ Line</button><button class="btn" id="exportSelectedKmzCL">Export Selected KMZ CL CSV</button><button class="btn primary" id="exportCADPointsCSV">⌖ EXPORT CAD POINTS / VERTICES CSV</button><div class="note">Choose CAD Points to export all standalone CAD points, or Vertices and tap a CAD / CL / imported KMZ line to export every vertex on that line.</div><button class="btn primary" id="kmzBendSummary">⌁ BENDS — Calculate Bend Counts</button><div class="note">Select a KMZ centerline first. Counts bends by rounded-up angle: 0–30°, 31–45°, and 46–90°.</div><label>Starting station (feet)</label><input id="kmzCLStart" type="number" value="0" step="0.01"><div class="note" id="kmzCLInfo">Tap Export CL, then tap near the end you want as BEGIN. PI markers appear on the selected line only. Export includes coordinates, station, bearings, and bend angles.</div><h2>HDD / BORE DESIGN</h2><button class="btn primary" id="openHddCalculator" type="button">⌁ CALC HDD'S — Open HDD Calculator</button><div class="note">Opens the full HDD creek / ROW calculator without leaving your TerraTrace map.</div><h2>CAD</h2><label><input type="checkbox" id="showVertices"> Show Vertices (CL / CAD / KMZ)</label><button class="btn mode" data-mode="select">↖ Select / Drag CAD + KMZ Vertices</button><button class="btn mode" data-mode="delete">⌫ Delete Point / Line / Pin / Vertex</button><button class="btn mode" data-mode="addVertex">⊕ CALC: Insert Vertex on CL</button><button class="btn mode" data-mode="editLine">✎ Edit Polyline / Insert Vertex</button><button class="btn mode" data-mode="point">⊙ Drop CAD Point</button><button class="btn" id="keyinPoint">⌖ Key In Northing / Easting</button><button class="btn mode" data-mode="circle">◯ Draw Circle (center + radius)</button><button class="btn mode" data-mode="copyObject">⧉ Copy Whole Object</button><button class="btn mode" data-mode="moveObject">✥ Move Whole Object — Hold Vertex & Drag</button><button class="btn mode" data-mode="mirrorObject">⇋ Mirror Whole Object</button><label><input type="checkbox" id="snapEnabled" checked> Snap dragged vertices to nearest line / vertex</label><label>Snap tolerance (screen pixels)</label><input type="number" id="snapTolerance" value="16" min="2" max="60"><button class="btn mode" data-mode="photo">▣ Drop Photo Pin</button><button class="btn mode" data-mode="draw">⌁ Draw Polyline (Live Preview)</button><button class="btn mode" data-mode="offset">⇆ Offset Segment (CAD / KMZ)</button><label>Offset distance (project units)</label><input id="offsetDistance" type="number" min="0" step="any" value="25"><button class="btn mode" data-mode="trim">✂ Trim Line</button><button class="btn mode" data-mode="intersectLines">⌁ Intersect Lines — Auto Trim</button><button class="btn" id="finishIntersectLines">Finish Intersect Lines</button><button class="btn" id="finishLine">Finish Polyline</button><button class="btn mode" data-mode="inverse">↔ Inverse (Snap to PI / Vertex)</button><button class="btn" id="undo">↶ Undo last edit</button><button class="btn" id="resetCL">Restore original imported CL</button><h2>STATIONING</h2><label><input type="checkbox" id="showStationing" checked> Show Stationing</label><button class="btn mode" data-mode="stationPick">⌁ Pick CL for Stationing</button><label>Starting station</label><input id="stationingStart" value="0+00" placeholder="0+00"><div class="note" id="stationingInfo">Pick a centerline, then Set Stationing. Labels appear every 200 ft and at each PI. Station equations are applied.</div><div class="flex"><button class="btn primary" id="setStationing">Set Stationing</button><button class="btn" id="redoStationing">Redo Stationing</button></div><button class="btn" id="addEquation">＋ Add Station Equation</button><button class="btn" id="manageEquations">Manage Station Equations</button><div class="note">Enter BACK and AHEAD stations (e.g. 12+50 and 15+00). No map selection required. The BACK station locates the equation along the edited centerline; AHEAD sets downstream stationing.</div><h2>ANNOTATIONS</h2><button class="btn mode" data-mode="annotation">➤ Arrow Annotation / Text</button><button class="btn mode" data-mode="dimension">↔ Dimension — Pick 2 Points, Drag to Place</button><h2>MAP LAYERS</h2><div class="flex"><button class="btn" id="aerial">Aerial</button><button class="btn" id="street">Street</button></div><label><input type="checkbox" id="showOriginal" checked> Original IFC CL (dashed)</label><label><input type="checkbox" id="showCad" checked> CAD / edited centerline</label><label><input type="checkbox" id="showRef" checked> Reference GIS</label><label><input type="checkbox" id="showAnnotations" checked> Arrow annotations</label><h2>EXPORT</h2><button class="btn primary" id="kmz">Export KMZ + imported GIS + photos</button><button class="btn primary" id="dxf">Export DXF (project CRS)</button><button class="btn primary" id="photoReport">▣ Export Photo Report — Pick CL First</button><p class="note">Projects are not automatically saved. Export ZIP backups to On My iPad for durable copies.</p></aside><div class="foot"><div class="chip" id="modeText">SELECT</div><div class="chip" id="measure">CL: —</div><div class="spacer"></div><button class="btn" id="closeMenu">Hide menu</button></div><div class="modalbg" id="modalbg"><div class="modal"><h3 id="modalTitle">Pin</h3><div id="modalBody"></div><div class="flex" style="margin-top:12px"><button class="btn" id="modalCancel">Close</button><button class="btn primary" id="modalOK">Save</button></div></div></div><input type="file" id="fileGISLibrary" multiple accept=".kml,.kmz,.geojson,.json,.zip" multiple hidden><input type="file" id="fileCL" accept=".csv,text/csv" hidden><input type="file" id="fileGIS" accept=".geojson,.json,.kml,.kmz,application/vnd.google-earth.kmz" hidden><input type="file" id="fileProject" accept=".json" hidden><input type="file" id="fileBackup" accept=".zip" hidden><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script><script src="https://cdn.jsdelivr.net/npm/@turf/turf@6.5.0/turf.min.js"></script><script src="https://cdn.jsdelivr.net/npm/shpjs@4.0.4/dist/shp.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.11.0/proj4.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script><script>
+</style><script>window.TT_CONFIG=Object.freeze({projectApi:'https://terratrace-api.supersurveyor1985.workers.dev',gisApi:'https://terratrace-gis-api.supersurveyor1985.workers.dev',defaultProject:'PICKTON_TRUNK',projectToken:'Mtf0213!?',gisToken:'5e950381c94dba6c9a9b4636ae817b45690eb6392f6fc088c8cb078bd8ad5346'});</script><script>window.ttVolatileStorage=(()=>{return {getItem:k=>null,setItem:(k,v)=>{},removeItem:k=>{}}})();</script><style>
+#ttDocsSection .tt-doc-toolbar{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+#ttDocsSection .tt-doc-toolbar .btn{width:auto;flex:1;min-width:95px;text-align:center}
+#ttDocsSection .tt-doc-item{border:1px solid #30485a;border-radius:7px;margin:7px 0;padding:9px;background:#111d29}
+#ttDocsSection .tt-doc-name{font-weight:650;overflow-wrap:anywhere;color:#eaf5f8}
+#ttDocsSection .tt-doc-meta{color:#a8c1cd;font-size:11px;margin:4px 0}
+#ttDocsSection .tt-doc-actions{display:flex;gap:5px;flex-wrap:wrap}
+#ttDocsSection .tt-doc-actions button{width:auto;margin:3px 0;font-size:11px;padding:7px}
+#ttDocsSection .tt-doc-breadcrumb{overflow-wrap:anywhere;color:#a9dcef;font-size:11px;padding:8px 0}
+#ttDocsSection .tt-doc-status{white-space:pre-wrap;overflow-wrap:anywhere;border:1px solid #335065;padding:9px;border-radius:6px;background:#0b1520;margin:8px 0}
+#ttDocsSection input[type=file]{padding:7px;font-size:11px}
+</style></head><body><div id="map"></div><header><button id="menuBtn" class="btn">☰ Commands</button><h1>TerraTrace <b>Field Software</b></h1><div class="status" id="status">READY</div></header><aside class="drawer open" id="drawer"><h2>PROJECT MANAGER</h2><label>Current project</label><select id="projectSelect"></select><div class="flex"><button class="btn" id="newProject">＋ New Project</button><button class="btn" id="openLocalProject">Open Project</button></div><div class="flex"><button class="btn" id="renameProject">Rename</button><button class="btn" id="deleteProject">Delete Project</button></div><button class="btn primary" id="saveLocalProject">Save Local Copy</button><div class="note">Each project has its own geometry, photo pins, reference layers and coordinate system. Local projects must be exported to Files. Cloud projects open directly into memory and sync through Cloudflare. Use Backup ZIP to save a durable copy in On My iPad through Files. Safari website data is separate from Files storage.</div><h2>CLOUD PROJECTS — MANAGEMENT</h2><label>All cloud projects</label><select id="cloudProjectSelect"><option value="">Connect to load cloud projects</option></select><div class="flex"><button class="btn" id="cloudRefresh">↻ Refresh Projects</button><button class="btn primary" id="cloudOpen">Open Cloud Project</button></div><label style="display:none">Cloud API URL (Workers endpoint)</label><input style="display:none" id="cloudApi" value="https://terratrace-api.supersurveyor1985.workers.dev" placeholder="https://terratrace-cloud-api.YOU.workers.dev"><label style="display:none">Project ID</label><input style="display:none" id="cloudProjectId" value="TEST" placeholder="TEST"><label style="display:none">Project access token</label><input style="display:none" id="cloudToken" type="password" placeholder="Admin or viewer token"><div class="flex" style="display:none"><button class="btn" id="cloudConnect">Connect / Sync</button><button class="btn" id="cloudDisconnect">Disconnect</button></div><div class="flex"><button class="btn primary" id="cloudPublish">Publish Local to Cloud</button><button class="btn" id="cloudDownload">Download Project</button></div><div class="note" id="cloudStatus">Cloud disconnected. Cloud sync requires a deployed Worker. Cloud settings are built into this HTML file. Use only on trusted devices.</div><h2>PROJECT / COORDINATES</h2><label>Project coordinate system (EPSG)</label><select id="epsg"><option value="">Choose coordinate system</option><option value="2257">EPSG:2257 — New Mexico East — NAD83 (US ft)</option><option value="2258">EPSG:2258 — New Mexico Central — NAD83 (US ft)</option><option value="2259">EPSG:2259 — New Mexico West — NAD83 (US ft)</option><option value="2275">EPSG:2275 — Texas North — NAD83 (US ft)</option><option value="2276">EPSG:2276 — Texas North Central — NAD83 (US ft)</option><option value="2277">EPSG:2277 — Texas Central — NAD83 (US ft)</option><option value="2278">EPSG:2278 — Texas South Central — NAD83 (US ft)</option><option value="2279">EPSG:2279 — Texas South — NAD83 (US ft)</option><option value="26913">EPSG:26913 — UTM Zone 13N — NAD83 (meters)</option><option value="26914">EPSG:26914 — UTM Zone 14N — NAD83 (meters)</option><option value="32112">EPSG:32112 — New Mexico East — NAD83 (meters)</option><option value="32140">EPSG:32140 — Texas South Central — NAD83 (meters)</option></select><label>Custom PROJ4 (advanced)</label><input id="proj" placeholder="Paste PROJ4 definition for your State Plane zone"><div class="note">Choose the EPSG zone above, or supply a custom PROJ4 definition. Verify datum, zone and units against the survey control before importing.</div><div class="flex"><button class="btn" id="saveCrs">Apply CRS</button><button class="btn" id="gps">▶ Start Live GPS</button></div><label><input type="checkbox" id="gpsFollow" checked> Follow GPS position</label><div class="note" id="gpsStatus">GPS off · Requires location permission and HTTPS (or localhost).</div><button class="btn" id="gpsCenter">◎ Center on GPS</button><h2>IPAD STORAGE / BACKUPS</h2><div class="note">Projects stay in memory until you export them to the Files app. No browser project storage is used. For a durable copy outside Safari, export a ZIP and save it in the Files app.</div><button class="btn primary" id="ipadBackup">Backup ZIP to iPad Files</button><button class="btn" id="ipadRestore">Restore ZIP backup</button><div class="note" id="storageInfo">No Google Drive connection or sync. Save a ZIP or JSON to Files before closing TerraTrace; unsaved edits will be lost.</div><h2>DATA / IMPORT</h2><button class="btn" id="loadCL">Import ordered CL CSV</button><button class="btn" id="loadProject">Open saved project JSON</button><button class="btn" id="saveProject">Save project JSON</button><label>Public or signed GeoJSON URL (optional)</label><input id="geoUrl" placeholder="https://.../project.geojson"><button class="btn" id="fetchGeo">Load URL layer</button><div class="note">Import local GIS files using the iPad Files picker, or a CORS-enabled GeoJSON URL. Large SHP/GDB/GPKG may need a server-side tile service.</div><h2>GIS DATA HUB / CORRIDOR</h2><div id="pythonGISPanel" style="background:#0a111b;border:1px solid #365367;border-radius:8px;padding:10px;margin:6px 0 14px"><div style="color:#46dbef;font-weight:750;letter-spacing:1px">☁ CLOUDFLARE GIS · INDEXED FLATGEOBUF</div><div class="note" style="margin:5px 0">Search indexed FlatGeobuf files in Cloudflare R2 by GIS category and your selected corridor. No manual file selection or local GIS database required.</div><label style="display:none">GIS Cloudflare API URL</label><input style="display:none" id="pythonGISURL" value="https://terratrace-gis-api.supersurveyor1985.workers.dev" spellcheck="false" autocomplete="off"><label style="display:none">GIS Access Token (separate from Project Sync)</label><input style="display:none" id="pythonGISToken" type="password" placeholder="Enter the GIS Worker viewer/admin token" autocomplete="off" spellcheck="false"><div class="note">GIS and project sync use separate Cloudflare Workers and may have different tokens. Credentials are embedded in the HTML; restrict access to the deployed app. Rotate any previously exposed tokens.</div><div class="flex"><button class="btn primary" id="pythonGISConnect" type="button">↻ CONNECT GIS CATEGORIES</button></div><div class="note" id="pythonGISStatus">Connect GIS to load the available R2 FlatGeobuf categories.</div><div class="note" id="pythonGISSearchDetail" style="display:none;white-space:pre-wrap;overflow-wrap:anywhere;margin-top:8px;border-top:1px solid #284254;padding-top:8px"></div><div id="pythonGISCategories"></div><label><input id="pythonGISEnabled" type="checkbox" checked> Search Cloudflare FlatGeobuf GIS</label><div class="note">Select categories, then tap one KMZ/CAD alignment or one area center. Search uses the entire selected line or circular area at your radius.</div></div><button class="btn primary" id="gisLibrary" style="display:none">＋ Load GIS files from iPad</button><label>Buffer radius (feet, on all sides)</label><input type="number" id="gisRadius" value="1000" min="1" step="any"><button class="btn mode" data-mode="gisPickLine">⌁ Pick Line → Buffer</button><button class="btn mode" data-mode="gisPickArea">▧ Pick Area → Buffer</button><div class="note">Pick Line: tap any part of a project KMZ / CAD line to select its entire alignment. Pick Area: tap one location to search a circular area using the buffer radius. Select categories and search.</div><div style="display:none" id="gisCategoryList" class="note"></div><div style="display:none" id="gisDatasetList" class="note">No additional source files loaded.</div><button class="btn primary" id="gisExtract">SEARCH CHECKED GIS IN BUFFER</button><div id="gisLoadedCategories" style="margin:10px 0;padding:10px;background:#0c151b;border:1px solid #365367;border-radius:8px"><div style="color:#56d9ef;font-weight:750;letter-spacing:1px">LOADED GIS LAYERS</div><div class="note">Show, hide, or remove GIS results by category. This affects this project only, not your Cloudflare R2 source files.</div><div id="gisLoadedCategoryRows" class="note" style="margin-top:8px">No GIS search results loaded.</div></div><button class="btn" style="display:none" id="gisClearLibrary">Clear loaded GIS library</button><button class="btn" style="display:none" id="gisClearPackages">Remove registered regional ZIPs</button><h2>KMZ CENTERLINE / PI EXPORT</h2><button class="btn primary mode" data-mode="exportKmzCL">⌁ EXPORT CL — Pick KMZ Line</button><button class="btn" id="exportSelectedKmzCL">Export Selected KMZ CL CSV</button><button class="btn primary" id="exportCADPointsCSV">⌖ EXPORT CAD POINTS / VERTICES CSV</button><div class="note">Choose CAD Points to export all standalone CAD points, or Vertices and tap a CAD / CL / imported KMZ line to export every vertex on that line.</div><button class="btn primary" id="kmzBendSummary">⌁ BENDS — Calculate Bend Counts</button><div class="note">Select a KMZ centerline first. Counts bends by rounded-up angle: 0–30°, 31–45°, and 46–90°.</div><label>Starting station (feet)</label><input id="kmzCLStart" type="number" value="0" step="0.01"><div class="note" id="kmzCLInfo">Tap Export CL, then tap near the end you want as BEGIN. PI markers appear on the selected line only. Export includes coordinates, station, bearings, and bend angles.</div><h2>HDD / BORE DESIGN</h2><button class="btn primary" id="openHddCalculator" type="button">⌁ CALC HDD'S — Open HDD Calculator</button><div class="note">Opens the full HDD creek / ROW calculator without leaving your TerraTrace map.</div><h2>CAD</h2><label><input type="checkbox" id="showVertices"> Show Vertices (CL / CAD / KMZ)</label><button class="btn mode" data-mode="select">↖ Select / Drag CAD + KMZ Vertices</button><button class="btn mode" data-mode="delete">⌫ Delete Point / Line / Pin / Vertex</button><button class="btn mode" data-mode="addVertex">⊕ CALC: Insert Vertex on CL</button><button class="btn mode" data-mode="editLine">✎ Edit Polyline / Insert Vertex</button><button class="btn mode" data-mode="point">⊙ Drop CAD Point</button><button class="btn" id="keyinPoint">⌖ Key In Northing / Easting</button><button class="btn mode" data-mode="circle">◯ Draw Circle (center + radius)</button><button class="btn mode" data-mode="copyObject">⧉ Copy Whole Object</button><button class="btn mode" data-mode="moveObject">✥ Move Whole Object — Hold Vertex & Drag</button><button class="btn mode" data-mode="mirrorObject">⇋ Mirror Whole Object</button><label><input type="checkbox" id="snapEnabled" checked> Snap dragged vertices to nearest line / vertex</label><label>Snap tolerance (screen pixels)</label><input type="number" id="snapTolerance" value="16" min="2" max="60"><button class="btn mode" data-mode="photo">▣ Drop Photo Pin</button><button class="btn mode" data-mode="draw">⌁ Draw Polyline (Live Preview)</button><button class="btn mode" data-mode="offset">⇆ Offset Segment (CAD / KMZ)</button><label>Offset distance (project units)</label><input id="offsetDistance" type="number" min="0" step="any" value="25"><button class="btn mode" data-mode="trim">✂ Trim Line</button><button class="btn mode" data-mode="intersectLines">⌁ Intersect Lines — Auto Trim</button><button class="btn" id="finishIntersectLines">Finish Intersect Lines</button><button class="btn" id="finishLine">Finish Polyline</button><button class="btn mode" data-mode="inverse">↔ Inverse (Snap to PI / Vertex)</button><button class="btn" id="undo">↶ Undo last edit</button><button class="btn" id="resetCL">Restore original imported CL</button><h2>STATIONING</h2><label><input type="checkbox" id="showStationing" checked> Show Stationing</label><button class="btn mode" data-mode="stationPick">⌁ Pick CL for Stationing</button><label>Starting station</label><input id="stationingStart" value="0+00" placeholder="0+00"><div class="note" id="stationingInfo">Pick a centerline, then Set Stationing. Labels appear every 200 ft and at each PI. Station equations are applied.</div><div class="flex"><button class="btn primary" id="setStationing">Set Stationing</button><button class="btn" id="redoStationing">Redo Stationing</button></div><button class="btn" id="addEquation">＋ Add Station Equation</button><button class="btn" id="manageEquations">Manage Station Equations</button><div class="note">Enter BACK and AHEAD stations (e.g. 12+50 and 15+00). No map selection required. The BACK station locates the equation along the edited centerline; AHEAD sets downstream stationing.</div><h2>ANNOTATIONS</h2><button class="btn mode" data-mode="annotation">➤ Arrow Annotation / Text</button><button class="btn mode" data-mode="dimension">↔ Dimension — Pick 2 Points, Drag to Place</button><h2>MAP LAYERS</h2><div class="flex"><button class="btn" id="aerial">Aerial</button><button class="btn" id="street">Street</button></div><label><input type="checkbox" id="showOriginal" checked> Original IFC CL (dashed)</label><label><input type="checkbox" id="showCad" checked> CAD / edited centerline</label><label><input type="checkbox" id="showRef" checked> Reference GIS</label><label><input type="checkbox" id="showAnnotations" checked> Arrow annotations</label><h2>EXPORT</h2><button class="btn primary" id="kmz">Export KMZ + imported GIS + photos</button><button class="btn primary" id="dxf">Export DXF (project CRS)</button><button class="btn primary" id="photoReport">▣ Export Photo Report — Pick CL First</button><p class="note">Projects are not automatically saved. Export ZIP backups to On My iPad for durable copies.</p></aside><div class="foot"><div class="chip" id="modeText">SELECT</div><div class="chip" id="measure">CL: —</div><div class="spacer"></div><button class="btn" id="closeMenu">Hide menu</button></div><div class="modalbg" id="modalbg"><div class="modal"><h3 id="modalTitle">Pin</h3><div id="modalBody"></div><div class="flex" style="margin-top:12px"><button class="btn" id="modalCancel">Close</button><button class="btn primary" id="modalOK">Save</button></div></div></div><input type="file" id="fileGISLibrary" multiple accept=".kml,.kmz,.geojson,.json,.zip" multiple hidden><input type="file" id="fileCL" accept=".csv,text/csv" hidden><input type="file" id="fileGIS" accept=".geojson,.json,.kml,.kmz,application/vnd.google-earth.kmz" hidden><input type="file" id="fileProject" accept=".json" hidden><input type="file" id="fileBackup" accept=".zip" hidden><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script><script src="https://cdn.jsdelivr.net/npm/@turf/turf@6.5.0/turf.min.js"></script><script src="https://cdn.jsdelivr.net/npm/shpjs@4.0.4/dist/shp.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.11.0/proj4.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script><script>
 (()=>{'use strict';let kmzSelectedCL=null,kmzPILayer=null,stationingSelection=null;const $=id=>document.getElementById(id);const state={projectName:'Untitled Project',crs:'',cl:[],original:[],points:[],photos:[],lines:[],reference:[],gisLibrary:[],annotations:[],stationEquations:[],stationingOverlay:null,stationingVisible:true,dimensions:[],ownershipTracts:{},ownershipRows:[],ownershipRoute:null,annotationStart:null,dimensionStart:[],mode:'select',history:[],drawing:[],inverse:[],counter:1,selectedLine:null,trimTarget:null};let map,base,originalLayer,clLayer,vertexLayer,pointLayer,photoLayer,lineLayer,refLayer,stationLayer,drawLayer,gpsLayer,annotationLayer;let gpsWatch=null,gpsMarker=null,gpsCircle=null,gpsLast=null;const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));const status=s=>$('status').textContent=s;const download=(name,blob)=>{const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),2000)};const icon=(cls)=>L.divIcon({className:'',html:`<div class="${cls}"></div>`,iconSize:[17,17],iconAnchor:[8,8]});const EPSG_DEFS={2257:"+proj=tmerc +lat_0=31 +lon_0=-104.333333333333 +k=0.999909091 +x_0=165000 +y_0=0 +datum=NAD83 +units=us-ft +no_defs +type=crs",2258:"+proj=tmerc +lat_0=31 +lon_0=-106.25 +k=0.9999 +x_0=500000.0001016 +y_0=0 +datum=NAD83 +units=us-ft +no_defs +type=crs",2259:"+proj=tmerc +lat_0=31 +lon_0=-107.833333333333 +k=0.999916667 +x_0=830000.0001016 +y_0=0 +datum=NAD83 +units=us-ft +no_defs +type=crs",2275:"+proj=lcc +lat_0=34 +lon_0=-101.5 +lat_1=36.1833333333333 +lat_2=34.65 +x_0=200000.0001016 +y_0=999999.9998984 +datum=NAD83 +units=us-ft +no_defs +type=crs",2276:"+proj=lcc +lat_0=31.6666666666667 +lon_0=-98.5 +lat_1=33.9666666666667 +lat_2=32.1333333333333 +x_0=600000 +y_0=2000000.0001016 +datum=NAD83 +units=us-ft +no_defs +type=crs",2277:"+proj=lcc +lat_0=29.6666666666667 +lon_0=-100.333333333333 +lat_1=31.8833333333333 +lat_2=30.1166666666667 +x_0=699999.9998984 +y_0=3000000 +datum=NAD83 +units=us-ft +no_defs +type=crs",2278:"+proj=lcc +lat_0=27.8333333333333 +lon_0=-99 +lat_1=30.2833333333333 +lat_2=28.3833333333333 +x_0=600000 +y_0=3999999.9998984 +datum=NAD83 +units=us-ft +no_defs +type=crs",2279:"+proj=lcc +lat_0=25.6666666666667 +lon_0=-98.5 +lat_1=27.8333333333333 +lat_2=26.1666666666667 +x_0=300000 +y_0=5000000.0001016 +datum=NAD83 +units=us-ft +no_defs +type=crs",26913:"+proj=utm +zone=13 +datum=NAD83 +units=m +no_defs +type=crs",26914:"+proj=utm +zone=14 +datum=NAD83 +units=m +no_defs +type=crs",32112:"+proj=tmerc +lat_0=31 +lon_0=-104.333333333333 +k=0.999909091 +x_0=165000 +y_0=0 +datum=NAD83 +units=m +no_defs +type=crs",32140:"+proj=lcc +lat_0=27.8333333333333 +lon_0=-99 +lat_1=30.2833333333333 +lat_2=28.3833333333333 +x_0=600000 +y_0=4000000 +datum=NAD83 +units=m +no_defs +type=crs"};const WGS='EPSG:4326';const validCRS=()=>{if(!state.crs)throw Error('Set the verified project CRS before using Northing/Easting or DXF.')};const toLL=(p)=>{validCRS();const [lon,lat]=proj4(state.crs,WGS,[p.e,p.n]);if(!isFinite(lon)||!isFinite(lat)||Math.abs(lat)>90||Math.abs(lon)>180)throw Error('Coordinate conversion failed; check CRS and units.');return [lat,lon]};const toXY=(ll)=>{validCRS();const [e,n]=proj4(WGS,state.crs,[ll.lng,ll.lat]);return {e,n}};const ll=p=>[p.lat,p.lon];const coords=p=>p.e!==undefined?toLL(p):[p.lat,p.lon];const distance=(a,b)=>Math.hypot(a.e-b.e,a.n-b.n);const length=pts=>pts.slice(1).reduce((s,p,i)=>s+distance(p,pts[i]),0);const sta=x=>`${Math.floor(x/100)}+${(x%100).toFixed(2).padStart(5,'0')}`;const UNDO_LIMIT=100;const undoSnapshot=()=>JSON.stringify({cl:state.cl,original:state.original,points:state.points,photos:state.photos,lines:state.lines,reference:state.reference,annotations:state.annotations,dimensions:state.dimensions,stationEquations:state.stationEquations,stationingOverlay:state.stationingOverlay,counter:state.counter});const remember=()=>{const snap=undoSnapshot();if(state.history[state.history.length-1]===snap)return;state.history.push(snap);if(state.history.length>UNDO_LIMIT)state.history.shift();updateUndoButton()};function updateUndoButton(){const b=$('undo');if(!b)return;b.textContent='↶ Undo edit'+(state.history.length?' ('+state.history.length+' available)':'');b.disabled=!state.history.length;};// IndexedDB stores full project snapshots, including photo data, without localStorage's small quota.
  const memoryProjects=new Map();let saveSequence=0;
  async function dbSet(k,v){memoryProjects.set(k,structuredClone(v))}
@@ -1927,5 +1938,267 @@ window.terraTracePythonGIS={
   return m;
  }
 };
+})();
+</script><script src="https://accounts.google.com/gsi/client" async defer></script><script>
+/* TerraTrace Document Center: Google Identity Services + Drive API, directly from each user's device.
+   Google OAuth web client ID is public configuration (NOT a secret). No Google Drive token is stored.
+   Access is restricted to the permissions of the signed-in Google user and the target folder.
+   Configure a Google Cloud OAuth Web client and add your GitHub Pages origin to Authorized JavaScript origins. */
+(()=>{'use strict';
+ const ROOT_SHORTCUT_ID='1bCjarYkClYlIJwcGYVGACSdNjcH2NrfA';
+ const RELATIVE_PATH=['INTEGRITY PIPELINE INTELLIGENCE','DOCUMENT CENTER'];
+ // OPTIONALLY insert the Google OAuth 2.0 web Client ID here before hosting this HTML.
+ const DEFAULT_GOOGLE_CLIENT_ID='763019060124-309idhiqmlni7o4i0f6kfcu9e32s4ubn.apps.googleusercontent.com';
+ const $=id=>document.getElementById(id);
+ let accessToken='',expiresAt=0,client=null,rootFolder=null,folder=null,trail=[],lastItems=[],busy=false;
+ const FOLDER='application/vnd.google-apps.folder';
+ const SHORTCUT='application/vnd.google-apps.shortcut';
+ const googleNative='application/vnd.google-apps.';
+ const h=(v)=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ function msg(m){$('ttDocsStatus').textContent=m}
+ function working(yes){busy=yes;for(const b of document.querySelectorAll('#ttDocsSection button'))if(b.id!=='ttDocsDisconnect')b.disabled=yes}
+ function requestAuth(){
+  const id=$('ttDocsClientId').value.trim()||DEFAULT_GOOGLE_CLIENT_ID;
+  if(!id)throw Error('Enter a Google OAuth Web Client ID first. Google Drive cannot be accessed with the Windows G: path alone.');
+  if(!window.google?.accounts?.oauth2)throw Error('Google sign-in library did not load. Check network access or content blockers.');
+  if(client&&client._ttId===id)return client;
+  client=google.accounts.oauth2.initTokenClient({client_id:id,scope:'https://www.googleapis.com/auth/drive',callback:()=>{}});
+  client._ttId=id;return client;
+ }
+ async function signIn(){
+  if(busy)return;
+  try{
+   working(true);msg('Opening Google authorization...');
+   const auth=requestAuth();
+   const res=await new Promise((resolve,reject)=>{
+    auth.callback=r=>r.error?reject(Error(r.error_description||r.error)):resolve(r);
+    auth.error_callback=e=>reject(Error(e.message||e.type||'Google popup blocked'));
+    auth.requestAccessToken({prompt:'consent'});
+   });
+   accessToken=res.access_token;expiresAt=Date.now()+(Number(res.expires_in)||3500)*1000-60000;
+   msg('Google authorized. Finding DOCUMENT CENTER folder...');
+   const resolved=await resolveRoot();rootFolder=resolved;folder=resolved;trail=[{id:folder.id,name:'DOCUMENT CENTER'}];
+   $('ttDocsDisconnect').disabled=false;
+   await listFolder();
+  }catch(e){msg('Connection failed: '+e.message)}finally{working(false)}
+ }
+ function authHeader(){if(!accessToken||Date.now()>expiresAt)throw Error('Google authorization expired. Click Connect Google Drive again.');return {Authorization:'Bearer '+accessToken}}
+ async function api(path,{method='GET',body,headers={},raw=false}={}){
+  const r=await fetch('https://www.googleapis.com'+path,{method,headers:{...authHeader(),...headers},body});
+  if(!r.ok){const t=await r.text().catch(()=>r.statusText);let message=t;try{const j=JSON.parse(t);message=j.error?.message||t}catch(e){}throw Error('Google Drive '+r.status+': '+message)}
+  if(raw)return r;
+  return r.status===204?{}:r.json();
+ }
+ const params=p=>new URLSearchParams(p).toString();
+ async function getFile(id){return api('/drive/v3/files/'+encodeURIComponent(id)+'?'+params({fields:'id,name,mimeType,shortcutDetails,webViewLink',supportsAllDrives:'true'}))}
+ async function findChild(parentId,name){
+  const q="'"+parentId.replace(/'/g,"\\'")+"' in parents and trashed = false and name = '"+name.replace(/'/g,"\\'")+"'";
+  const r=await api('/drive/v3/files?'+params({q,fields:'nextPageToken,files(id,name,mimeType,shortcutDetails)',pageSize:'100',supportsAllDrives:'true',includeItemsFromAllDrives:'true'}));
+  return (r.files||[]).find(f=>f.mimeType===FOLDER||f.mimeType===SHORTCUT)||null;
+ }
+ async function resolveRoot(){
+  const direct=$('ttDocsFolderId').value.trim();
+  if(direct){let target=await getFile(direct);if(target.mimeType===SHORTCUT)target=await getFile(target.shortcutDetails.targetId);if(target.mimeType!==FOLDER)throw Error('The provided folder ID does not refer to a folder.');return target;}
+  // G:\.shortcut-targets-by-id\<ID> resolves to a Google Drive folder or shortcut target.
+  let current=await getFile(ROOT_SHORTCUT_ID);
+  if(current.mimeType===SHORTCUT)current=await getFile(current.shortcutDetails.targetId);
+  if(current.mimeType!==FOLDER)throw Error('Provided Google Drive shortcut ID did not resolve to a folder. Paste the real DOCUMENT CENTER folder ID into the code.');
+  // The Windows shortcut may already point inside the stated path. Resolve the remaining path only.
+  const segments=[...RELATIVE_PATH];
+  const ix=segments.findIndex(s=>s.toLowerCase()===current.name.toLowerCase());
+  if(ix>=0)segments.splice(0,ix+1);
+  for(const name of segments){let f=await findChild(current.id,name);if(!f)throw Error('Could not find "'+name+'" inside "'+current.name+'". Check the shared-folder permissions and shortcut location.');if(f.mimeType===SHORTCUT)f=await getFile(f.shortcutDetails.targetId);current=f;}
+  return current;
+ }
+ async function listFolder(){
+  if(!folder)return;
+  const all=[];let next='';
+  do{
+   const p={q:"'"+folder.id+"' in parents and trashed = false",fields:'nextPageToken,files(id,name,mimeType,size,modifiedTime,webViewLink,shortcutDetails)',pageSize:'1000',orderBy:'folder,name',supportsAllDrives:'true',includeItemsFromAllDrives:'true'};
+   if(next)p.pageToken=next;
+   const data=await api('/drive/v3/files?'+params(p));all.push(...(data.files||[]));next=data.nextPageToken||'';
+  }while(next&&all.length<20000);
+  lastItems=all.sort((a,b)=>(a.mimeType===FOLDER?-1:0)-(b.mimeType===FOLDER?-1:0)||a.name.localeCompare(b.name));
+  render();msg('Connected · '+all.length+' items in '+folder.name+' · Direct Google Drive connection (PC not required).');
+ }
+ function render(){
+  $('ttDocsBreadcrumb').textContent='DOCUMENT CENTER'+trail.slice(1).map(x=>' / '+x.name).join('');
+  $('ttDocsUp').disabled=trail.length<=1;
+  const query=$('ttDocsSearch').value.trim().toLowerCase();
+  const list=lastItems.filter(x=>x.name.toLowerCase().includes(query));
+  const host=$('ttDocsFiles');host.replaceChildren();
+  if(!list.length){host.innerHTML='<div class="note">No documents or folders match this view.</div>';return}
+  for(const item of list){
+   const row=document.createElement('div');row.className='tt-doc-item';
+   const title=document.createElement('div');title.className='tt-doc-name';title.textContent=(item.mimeType===FOLDER?'📁 ':item.mimeType===SHORTCUT?'↗ ':'📄 ')+item.name;
+   const meta=document.createElement('div');meta.className='tt-doc-meta';meta.textContent=(item.mimeType===FOLDER?'Folder':item.mimeType===SHORTCUT?'Shortcut':item.mimeType.startsWith(googleNative)?'Google document':item.mimeType)+(item.size?' · '+(Number(item.size)/1048576).toFixed(2)+' MB':'')+(item.modifiedTime?' · '+new Date(item.modifiedTime).toLocaleDateString():'');
+   const actions=document.createElement('div');actions.className='tt-doc-actions';
+   function btn(label,fn){const b=document.createElement('button');b.className='btn';b.type='button';b.textContent=label;b.onclick=()=>fn().catch(e=>msg('Error: '+e.message));actions.append(b)}
+   if(item.mimeType===FOLDER||item.mimeType===SHORTCUT&&item.shortcutDetails?.targetMimeType===FOLDER)btn('Open folder',async()=>{let target=item;if(item.mimeType===SHORTCUT)target=await getFile(item.shortcutDetails.targetId);folder=target;trail.push({id:target.id,name:item.name});await listFolder()});
+   else {btn('Download',()=>downloadFile(item));btn('Open in Drive',async()=>{const url=item.webViewLink||'https://drive.google.com/file/d/'+encodeURIComponent(item.id)+'/view';window.open(url,'_blank','noopener')})}
+   row.append(title,meta,actions);host.append(row);
+  }
+ }
+ const safeFilename=n=>n.replace(/[\\/\x00-\x1f]/g,'_');
+ function saveBlob(blob,name){const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=safeFilename(name);document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000)}
+ async function downloadFile(item){
+  if(item.mimeType===FOLDER)throw Error('Open the folder first.');
+  if(item.mimeType===SHORTCUT){item=await getFile(item.shortcutDetails.targetId)}
+  if(item.mimeType.startsWith(googleNative)){
+   const exports={'application/vnd.google-apps.document':['application/pdf','.pdf'],'application/vnd.google-apps.spreadsheet':['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet','.xlsx'],'application/vnd.google-apps.presentation':['application/vnd.openxmlformats-officedocument.presentationml.presentation','.pptx'],'application/vnd.google-apps.drawing':['application/pdf','.pdf']};
+   const format=exports[item.mimeType];if(!format)throw Error('This Google file format does not support direct export. Use Open in Drive.');
+   msg('Exporting '+item.name+'...');const r=await api('/drive/v3/files/'+encodeURIComponent(item.id)+'/export?'+params({mimeType:format[0]}),{raw:true});saveBlob(await r.blob(),item.name+format[1]);
+  }else{
+   msg('Downloading '+item.name+'...');const r=await api('/drive/v3/files/'+encodeURIComponent(item.id)+'?alt=media&supportsAllDrives=true',{raw:true});saveBlob(await r.blob(),item.name);
+  }
+  msg('Download started for '+item.name+'. On iPad, use Safari Downloads / Save to Files.');
+ }
+ async function uploadFile(file,parentId=folder?.id){
+  if(!folder)throw Error('Connect to Google Drive first.');
+  // Google Drive resumable upload; browser sends file directly to Google, not through a Windows PC.
+  const metadata={name:file.name,parents:[parentId]};
+  const r=await api('/upload/drive/v3/files?uploadType=resumable&supportsAllDrives=true',{method:'POST',body:JSON.stringify(metadata),headers:{'Content-Type':'application/json; charset=UTF-8','X-Upload-Content-Type':file.type||'application/octet-stream','X-Upload-Content-Length':String(file.size)},raw:true});
+  const location=r.headers.get('Location');
+  if(!location)throw Error('Google Drive did not return a resumable upload session. Check browser CORS and upload permissions.');
+  const done=await fetch(location,{method:'PUT',headers:{'Content-Type':file.type||'application/octet-stream',...(file.size?{'Content-Range':'bytes 0-'+(file.size-1)+'/'+file.size}:{'Content-Length':'0'})},body:file});
+  if(!done.ok)throw Error('Upload failed ('+done.status+'): '+(await done.text()).slice(0,400));
+ }
+ async function uploadSelected(){
+  if(busy)return;
+  const input=$('ttDocsUpload');const files=Array.from(input.files||[]);
+  if(!files.length)return msg('Choose one or more files first.');
+  try{working(true);for(let i=0;i<files.length;i++){msg('Uploading '+(i+1)+' / '+files.length+': '+files[i].name);await uploadFile(files[i])}input.value='';await listFolder();msg('Uploaded '+files.length+' file(s) directly to Google Drive.')}catch(e){msg('Upload error: '+e.message)}finally{working(false)}
+ }
+ // Whole-folder upload: reproduce nested folder paths in Google Drive, not a flat batch.
+ async function findExistingFolder(parentId,name){
+  const q="'"+parentId.replace(/'/g,"\\'")+"' in parents and trashed = false and mimeType = '"+FOLDER+"' and name = '"+name.replace(/'/g,"\\'")+"'";
+  let token='';do{
+   const p={q,fields:'nextPageToken,files(id,name,mimeType)',pageSize:'1000',supportsAllDrives:'true',includeItemsFromAllDrives:'true'};
+   if(token)p.pageToken=token;
+   const result=await api('/drive/v3/files?'+params(p));
+   const match=(result.files||[]).find(x=>x.mimeType===FOLDER&&x.name===name);
+   if(match)return match.id;
+   token=result.nextPageToken||'';
+  }while(token);
+  return null;
+ }
+ async function createDriveFolder(parentId,name){
+  const response=await api('/drive/v3/files?supportsAllDrives=true&fields=id,name',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,mimeType:FOLDER,parents:[parentId]})});
+  if(!response.id)throw Error('Drive did not return the ID of newly created folder '+name);
+  return response.id;
+ }
+ async function uploadTree(entries,folderPaths=[],source='folder'){
+  if(busy)return;
+  if(!folder)return msg('Connect to Google Drive first.');
+  if(!entries.length&&!folderPaths.length)return msg('No files were selected. Empty folders cannot be read using the browser folder picker; a ZIP can preserve them.');
+  const base=folder.id;
+  const cache=new Map([['',base]]);
+  const splitPath=v=>String(v||'').replace(/\\/g,'/').split('/').filter(x=>x&&x!=='.'&&x!=='..');
+  const ensurePath=async path=>{
+   const parts=splitPath(path);let prefix='',parentId=base;
+   for(const name of parts){
+    const key=prefix?prefix+'/'+name:name;
+    if(!cache.has(key)){
+     let id=await findExistingFolder(parentId,name);
+     if(!id)id=await createDriveFolder(parentId,name);
+     cache.set(key,id);
+    }
+    parentId=cache.get(key);prefix=key;
+   }
+   return parentId;
+  };
+  let uploaded=0;
+  try{
+   working(true);
+   // Create parent folders first, including empty directories from ZIPs.
+   const dirs=new Set(folderPaths);
+   for(const entry of entries){const parts=splitPath(entry.path);parts.pop();if(parts.length)dirs.add(parts.join('/'));}
+   const ordered=[...dirs].sort((a,b)=>splitPath(a).length-splitPath(b).length||a.localeCompare(b));
+   for(let i=0;i<ordered.length;i++){msg('Creating folders '+(i+1)+' / '+ordered.length+': '+ordered[i]);await ensurePath(ordered[i]);}
+   for(let i=0;i<entries.length;i++){
+    const entry=entries[i],parts=splitPath(entry.path),name=parts.pop();
+    if(!name)continue;
+    const parentId=await ensurePath(parts.join('/'));
+    msg('Uploading '+(i+1)+' / '+entries.length+': '+entry.path);
+    const file=entry.file.name===name?entry.file:new File([entry.file],name,{type:entry.file.type||'application/octet-stream'});
+    await uploadFile(file,parentId);
+    uploaded++;
+   }
+   await listFolder();
+   msg('Uploaded '+uploaded+' file(s) and '+cache.size-1+' folder(s) from '+source+' to Google Drive.');
+  }catch(e){msg('Folder upload stopped after '+uploaded+' / '+entries.length+' files: '+e.message+' (already uploaded items remain in Drive).')}
+  finally{working(false)}
+ }
+ async function uploadSelectedFolder(){
+  const input=$('ttDocsFolderUpload'),files=Array.from(input.files||[]);
+  if(!files.length)return msg('Choose a folder containing files first. For empty folders or iPad picker issues, use Upload Folder ZIP.');
+  const entries=files.map(file=>({file,path:file.webkitRelativePath||file.name}));
+  await uploadTree(entries,[],'selected folder');input.value='';
+ }
+ async function uploadZipFolder(){
+  if(busy)return;
+  const input=$('ttDocsZipUpload'),file=input.files?.[0];
+  if(!file)return msg('Choose a ZIP archive first.');
+  if(typeof JSZip==='undefined')return msg('ZIP support could not load; check the internet connection.');
+  try{
+   msg('Reading ZIP folder structure...');
+   const zip=await JSZip.loadAsync(file);
+   const entries=[],dirs=[];
+   const rootName=file.name.replace(/\.zip$/i,'').trim()||'Uploaded Folder';
+   for(const [path,item] of Object.entries(zip.files)){
+    if(path.startsWith('__MACOSX/')||path.split('/').some(x=>x==='..'||x==='__MACOSX'))continue;
+    const drivePath=rootName+'/'+path.replace(/^\/+/, '');
+    if(item.dir){dirs.push(drivePath);continue;}
+    const blob=await item.async('blob');
+    const name=path.split('/').filter(Boolean).pop();
+    if(!name)continue;
+    entries.push({path:drivePath,file:new File([blob],name,{type:blob.type||'application/octet-stream'})});
+   }
+   if(!entries.length&&!dirs.length)throw Error('Archive is empty');
+   await uploadTree(entries,[rootName,...dirs],'ZIP archive');
+  }catch(e){msg('ZIP upload error: '+e.message)}finally{input.value=''}
+ }
+ async function makeFolder(){
+  if(!folder)return msg('Connect Google Drive first.');
+  const name=prompt('New folder name');if(!name?.trim())return;
+  try{working(true);await api('/drive/v3/files?supportsAllDrives=true',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:name.trim(),mimeType:FOLDER,parents:[folder.id]})});await listFolder()}catch(e){msg('New folder error: '+e.message)}finally{working(false)}
+ }
+ function disconnect(){if(accessToken&&google?.accounts?.oauth2)google.accounts.oauth2.revoke(accessToken,()=>{});accessToken='';expiresAt=0;rootFolder=null;folder=null;trail=[];lastItems=[];$('ttDocsFiles').replaceChildren();$('ttDocsBreadcrumb').textContent='';msg('Disconnected. No access token is saved on this device.');$('ttDocsDisconnect').disabled=true}
+ function install(){
+  const drawer=$('drawer');if(!drawer||$('ttDocsSection'))return;
+  const section=document.createElement('details');section.className='tt-section';section.id='ttDocsSection';
+  section.innerHTML=`<summary>DOCUMENT CENTER · GOOGLE DRIVE</summary><div class="tt-section-body">
+  <div class="note">Upload (push), browse (pull), and download documents directly from Google Drive on Windows or iPad. No office PC or local G: drive connection required.</div>
+  <input type="hidden" id="ttDocsClientId" value="${h(DEFAULT_GOOGLE_CLIENT_ID)}">
+  <input type="hidden" id="ttDocsFolderId" value="">
+  <div class="tt-doc-toolbar"><button type="button" class="btn primary" id="ttDocsConnect">Connect Google Drive</button><button type="button" class="btn" id="ttDocsDisconnect" disabled>Disconnect</button></div>
+  <div id="ttDocsStatus" class="tt-doc-status note">Not connected. Sign in with an authorized Google account to access documents.</div>
+  <div class="tt-doc-breadcrumb" id="ttDocsBreadcrumb"></div>
+  <div class="tt-doc-toolbar"><button class="btn" id="ttDocsUp">↑ Up Folder</button><button class="btn" id="ttDocsRefresh">↻ Pull / Refresh</button><button class="btn" id="ttDocsNewFolder">＋ New Folder</button></div>
+  <label>Find a document in the current folder</label><input id="ttDocsSearch" placeholder="Search filenames...">
+  <div id="ttDocsFiles" style="max-height:390px;overflow-y:auto;margin:9px 0"><div class="note">Connect to browse documents.</div></div>
+  <label>Upload individual files</label><input type="file" id="ttDocsUpload" multiple>
+  <button class="btn primary" type="button" id="ttDocsPush">↑ Upload Selected Files</button>
+  <label>Upload a complete folder and its subfolders</label>
+  <input type="file" id="ttDocsFolderUpload" webkitdirectory directory multiple>
+  <button class="btn primary" type="button" id="ttDocsPushFolder">↑ Upload Entire Folder</button>
+  <div class="note">Creates the selected folder and its nested folders in Google Drive. Existing matching folders are reused. Files with matching names may be added as separate copies.</div>
+  <label>iPad fallback: upload a folder ZIP</label>
+  <input type="file" id="ttDocsZipUpload" accept=".zip,application/zip,application/x-zip-compressed">
+  <button class="btn" type="button" id="ttDocsPushZip">↑ Upload Folder ZIP (Extract in Drive)</button>
+  <div class="note">If your iPad cannot select a folder, compress it in the Files app and select the ZIP here. TerraTrace recreates its folder structure in Drive. Large ZIPs require device memory to extract. Downloads go to browser Downloads / iPad Files. Google folder permissions still apply.</div>
+  </div>`;
+  const ownership=$('ownershipSection');
+  const manual=[...drawer.querySelectorAll('h2, summary')].find(x=>x.textContent.trim()==='MANUAL TEAM SYNC');
+  const anchor=ownership||manual?.closest('details')||manual?.parentElement;
+  if(anchor&&anchor.parentElement===drawer)anchor.after(section);else drawer.insertBefore(section,drawer.firstChild);
+  $('ttDocsConnect').onclick=signIn;$('ttDocsDisconnect').onclick=disconnect;
+  $('ttDocsRefresh').onclick=async()=>{try{if(!folder)throw Error('Connect Google Drive first');working(true);await listFolder()}catch(e){msg(e.message)}finally{working(false)}};
+  $('ttDocsUp').onclick=async()=>{if(trail.length<2)return;trail.pop();folder={...trail[trail.length-1]};try{await listFolder()}catch(e){msg(e.message)}};
+  $('ttDocsNewFolder').onclick=makeFolder;$('ttDocsPush').onclick=uploadSelected;
+  $('ttDocsPushFolder').onclick=uploadSelectedFolder;$('ttDocsPushZip').onclick=uploadZipFolder;
+  $('ttDocsSearch').oninput=render;
+ }
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install);else install();
 })();
 </script></body></html>
