@@ -1765,8 +1765,16 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape'&&overlay.sty
 const api=()=>el('cloudApi').value.trim().replace(/\/+$/,''),token=()=>el('cloudToken').value.trim();
 const info=m=>el('cloudStatus').textContent=m;// Keep only the active cloud project ID across iPad OAuth page restarts; never store project contents or tokens.
 const TT_LAST_CLOUD_KEY='terratrace_active_cloud_project_v1';
-function rememberCloudId(id){try{localStorage.setItem(TT_LAST_CLOUD_KEY,id)}catch(e){try{sessionStorage.setItem(TT_LAST_CLOUD_KEY,id)}catch(_){}}}
-function lastCloudId(){try{return localStorage.getItem(TT_LAST_CLOUD_KEY)||sessionStorage.getItem(TT_LAST_CLOUD_KEY)||''}catch(e){try{return sessionStorage.getItem(TT_LAST_CLOUD_KEY)||''}catch(_){return ''}}}
+function rememberCloudId(id){
+ try{localStorage.setItem(TT_LAST_CLOUD_KEY,id)}catch(e){try{sessionStorage.setItem(TT_LAST_CLOUD_KEY,id)}catch(_){}}
+ // iPad Safari sometimes drops website storage when OAuth changes tabs. Keep only
+ // the cloud project ID (never project contents or credentials) in the URL too.
+ try{const u=new URL(location.href);u.searchParams.set('tt_cloud_project',id);history.replaceState(history.state,'',u.pathname+u.search+u.hash)}catch(e){}
+}
+function lastCloudId(){
+ try{const fromUrl=new URL(location.href).searchParams.get('tt_cloud_project');if(fromUrl)return fromUrl}catch(e){}
+ try{return localStorage.getItem(TT_LAST_CLOUD_KEY)||sessionStorage.getItem(TT_LAST_CLOUD_KEY)||''}catch(e){try{return sessionStorage.getItem(TT_LAST_CLOUD_KEY)||''}catch(_){return ''}}
+}
 window.ttCloudIds=new Set();
 async function call(path,opts={}){const r=await fetch(api()+path,{...opts,headers:{Authorization:'Bearer '+token(),...(opts.headers||{})}});if(!r.ok){let err='HTTP '+r.status;try{err=(await r.json()).error||err}catch{}throw Error(err)}return r}
 async function refresh(){const data=await(await call('/projects')).json(),raw=data.projects;const names=Array.isArray(raw)?raw.map(x=>typeof x==='string'?x:x.id||x.name||x.projectId).filter(Boolean):raw&&typeof raw==='object'?Object.keys(raw):[];window.ttCloudIds=new Set(names);const allNames=names.sort((a,b)=>String(a).localeCompare(String(b),undefined,{numeric:true}));const select=el('cloudProjectSelect');select.replaceChildren();if(!allNames.length){const o=document.createElement('option');o.value='';o.textContent='No cloud projects published';select.append(o)}for(const name of allNames){const o=document.createElement('option');o.value=name;o.textContent=name;select.append(o)}const wanted=el('cloudProjectId').value;const selected=allNames.includes(wanted)?wanted:(allNames.includes(cfg.defaultProject)?cfg.defaultProject:allNames[0]);if(selected){select.value=selected;el('cloudProjectId').value=selected}else{el('cloudProjectId').value=''}info('Connected · '+allNames.length+' cloud project(s) available.');return names}
@@ -1811,10 +1819,27 @@ async function publish(){
 }
 const run=fn=>()=>fn().catch(e=>info('Cloud error: '+e.message));el('cloudRefresh').onclick=run(refresh);el('cloudOpen').onclick=run(openCloud);el('cloudDownload').onclick=run(downloadCloudCopy);el('cloudPublish').onclick=run(publish);el('cloudConnect').onclick=run(refresh);el('cloudDisconnect').onclick=()=>info('Auto connection configured in app; restart to reconnect');el('cloudProjectSelect').onchange=()=>{if(el('cloudProjectSelect').value)el('cloudProjectId').value=el('cloudProjectSelect').value};
 el('cloudApi').value=cfg.projectApi;el('cloudProjectId').value=cfg.defaultProject;el('cloudToken').value=cfg.projectToken;
-const boot=async()=>{try{const names=await refresh();const previous=lastCloudId();if(previous&&names.includes(previous)){
-  info('Restoring '+previous+' after page restart...');
-  try{await openCloud(previous)}catch(e){info('Cloud project '+previous+' could not be restored: '+e.message+' · Select it and tap Open Cloud Project.')} 
- }}catch(e){info('Cloud connection failed: '+e.message)}};if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
+let restoringCloud=false;
+async function restoreActiveCloud(){
+ if(restoringCloud)return;
+ const previous=lastCloudId();
+ if(!previous||window.ttProject.name===previous)return;
+ // Never replace a locally created or otherwise modified management project.
+ if(window.ttProject.name!=='Untitled Project')return;
+ restoringCloud=true;
+ try{
+  const names=await refresh();
+  if(!names.includes(previous)){info('Saved cloud project '+previous+' is not available. Select a project and open it.');return}
+  info('Restoring '+previous+' after returning from Google...');
+  await openCloud(previous);
+ }catch(e){info('Cloud project '+previous+' could not be restored: '+e.message+' · Select it and tap Open Cloud Project.')}
+ finally{restoringCloud=false}
+}
+const boot=async()=>{try{await refresh();await restoreActiveCloud()}catch(e){info('Cloud connection failed: '+e.message)}};
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
+// Safari can resume the same page instead of loading it from scratch.
+window.addEventListener('pageshow',e=>{if(e.persisted)restoreActiveCloud()});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)restoreActiveCloud()});
 })();
 </script><script>
 /* Manual sync: in-memory baseline, never persists to browser. */
@@ -1992,6 +2017,10 @@ window.terraTracePythonGIS={
   if(busy)return;
   try{
    working(true);msg('Opening Google authorization...');
+   // Preserve the currently open cloud project across iPad OAuth tab switching.
+   try{const current=window.ttProject?.name,selected=document.getElementById('cloudProjectId')?.value;
+    if(current&&current===selected){const u=new URL(location.href);u.searchParams.set('tt_cloud_project',current);history.replaceState(history.state,'',u.pathname+u.search+u.hash)}
+   }catch(e){}
    const auth=requestAuth();
    const res=await new Promise((resolve,reject)=>{
     auth.callback=r=>r.error?reject(Error(r.error_description||r.error)):resolve(r);
