@@ -38,7 +38,7 @@
 const persist=()=>{status('Unsaved edits — Save Project or Sync Project before closing')};let gisRoute=null,gisArea=[],gisPreview=null;const projectKey=name=>'vector_project_v4_'+encodeURIComponent(name);
 let knownProjects=[];
 function projectNames(){return knownProjects.filter(n=>!window.ttCloudIds?.has(n))}
-function projectList(){const names=projectNames();$('projectSelect').innerHTML=names.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join('');if(names.includes(state.projectName))$('projectSelect').value=state.projectName}
+function projectList(){const select=$('projectSelect');if(!select)return;const names=projectNames();select.innerHTML=names.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join('');if(names.includes(state.projectName))select.value=state.projectName}
 function projectSnapshot(){const {history,mode,drawing,inverse,selectedLine,trimTarget,annotationStart,dimensionStart,...data}=state;return data}
 function saveCurrent(){const name=state.projectName;memoryProjects.set(name,structuredClone(projectSnapshot()));if(!knownProjects.includes(name))knownProjects.push(name);projectList();status('Project in memory — use Save Project or Backup ZIP to keep it');return true}
 async function refreshProjects(){knownProjects=await dbNames();projectList()}
@@ -1532,8 +1532,8 @@ async function gisPkgGet(key){const db=await gisPkgDB();return new Promise((ok,f
 async function gisPkgKeys(){const db=await gisPkgDB();return new Promise((ok,fail)=>{const tx=db.transaction('packages','readonly');const r=tx.objectStore('packages').getAllKeys();r.onsuccess=()=>ok(r.result);r.onerror=()=>fail(r.error)})}
 async function gisPkgRemove(key){const db=await gisPkgDB();return new Promise((ok,fail)=>{const tx=db.transaction('packages','readwrite');const r=tx.objectStore('packages').delete(key);tx.oncomplete=ok;tx.onerror=()=>fail(tx.error)})}
 let gisPackages=[];const gisCategorySelection=new Set();let gisCategoryInitialized=false;
-async function gisLoadPackages(){try{const keys=await gisPkgKeys();gisPackages=[];for(const key of keys){const blob=await gisPkgGet(key);if(!blob)continue;const zip=await JSZip.loadAsync(blob);const m=zip.file('manifest.json');if(!m)continue;const manifest=JSON.parse(await m.async('string'));if(manifest.format==='TerraTrace Region Package v1')gisPackages.push({key,manifest})}gisRenderCategories()}catch(err){console.warn('Regional library',err);$('gisPackageInfo').textContent='Regional library unavailable: '+err.message}}
-function gisRenderCategories(){const cats=[...new Set(gisPackages.flatMap(p=>p.manifest.layers.map(l=>l.category)))].sort();if(!gisCategoryInitialized){cats.forEach(c=>gisCategorySelection.add(c));gisCategoryInitialized=true}else cats.forEach(c=>{if(!gisKnownCategories.has(c))gisCategorySelection.add(c)});gisKnownCategories=new Set(cats);$('gisCategoryList').innerHTML=cats.length?'<b>SEARCH CATEGORIES</b>'+cats.map(c=>`<label><input type="checkbox" class="gisCategory" data-category="${esc(c)}" ${gisCategorySelection.has(c)?'checked':''}> ${esc(c)}</label>`).join(''):'<div class="note">Register regional ZIP packages to search indexed GIS by category.</div>';$('gisPackageInfo').textContent=gisPackages.length+' regional ZIP(s) registered on this iPad · '+cats.length+' categories. Only overlapping regions are searched.';document.querySelectorAll('.gisCategory').forEach(el=>el.onchange=()=>{el.checked?gisCategorySelection.add(el.dataset.category):gisCategorySelection.delete(el.dataset.category)})}
+async function gisLoadPackages(){try{const keys=await gisPkgKeys();gisPackages=[];for(const key of keys){const blob=await gisPkgGet(key);if(!blob)continue;const zip=await JSZip.loadAsync(blob);const m=zip.file('manifest.json');if(!m)continue;const manifest=JSON.parse(await m.async('string'));if(manifest.format==='TerraTrace Region Package v1')gisPackages.push({key,manifest})}gisRenderCategories()}catch(err){console.warn('Regional library',err);if($('gisPackageInfo'))$('gisPackageInfo').textContent='Regional library unavailable: '+err.message}}
+function gisRenderCategories(){const cats=[...new Set(gisPackages.flatMap(p=>p.manifest.layers.map(l=>l.category)))].sort();if(!gisCategoryInitialized){cats.forEach(c=>gisCategorySelection.add(c));gisCategoryInitialized=true}else cats.forEach(c=>{if(!gisKnownCategories.has(c))gisCategorySelection.add(c)});gisKnownCategories=new Set(cats);$('gisCategoryList').innerHTML=cats.length?'<b>SEARCH CATEGORIES</b>'+cats.map(c=>`<label><input type="checkbox" class="gisCategory" data-category="${esc(c)}" ${gisCategorySelection.has(c)?'checked':''}> ${esc(c)}</label>`).join(''):'<div class="note">Register regional ZIP packages to search indexed GIS by category.</div>';if($('gisPackageInfo'))$('gisPackageInfo').textContent=gisPackages.length+' regional ZIP(s) registered on this iPad · '+cats.length+' categories. Only overlapping regions are searched.';document.querySelectorAll('.gisCategory').forEach(el=>el.onchange=()=>{el.checked?gisCategorySelection.add(el.dataset.category):gisCategorySelection.delete(el.dataset.category)})}
 let gisKnownCategories=new Set();
 function gisBoundsOverlap(a,b){return a[0]<=b[2]&&a[2]>=b[0]&&a[1]<=b[3]&&a[3]>=b[1]}
 function gisFeatureBounds(g){return turf.bbox(g)}
@@ -1788,7 +1788,23 @@ async function downloadCloudCopy(){
  setTimeout(()=>URL.revokeObjectURL(url),60000);
  info('Downloaded cloud backup for '+id+'. Save it in Files on iPad or your chosen PC folder.');
 }
-async function publish(){const name=window.ttProject.name;if(!/^[a-zA-Z0-9_-]{1,80}$/.test(name))throw Error('Invalid project name');const names=await refresh();if(names.includes(name))throw Error('Cloud project already exists');if(!confirm('Publish '+name+' to Cloudflare?'))return;const snap=window.ttProject.snapshot(),zip=new JSZip();zip.file('PROJECT.json',JSON.stringify(snap));await call('/projects/'+encodeURIComponent(name)+'/backup',{method:'PUT',headers:{'Content-Type':'application/zip'},body:await zip.generateAsync({type:'blob',compression:'DEFLATE'})});info('Published '+name+' backup to cloud.');await refresh()}
+function validCloudName(original){
+ const name=String(original||'').trim().replace(/[^a-zA-Z0-9_-]+/g,'_').replace(/^_+|_+$/g,'').slice(0,80);
+ if(!name)throw Error('Project name needs at least one letter or number. Rename the local project and try again.');
+ return name;
+}
+async function publish(){
+ const original=window.ttProject.name;
+ const name=validCloudName(original);
+ const names=await refresh();
+ if(names.some(n=>n.toLowerCase()===name.toLowerCase()))throw Error('Cloud project '+name+' already exists. Choose a different local project name.');
+ const display=original===name?name:original+' as '+name;
+ if(!confirm('Publish '+display+' to Cloudflare?'+(original!==name?'\n\nCloud project IDs cannot contain spaces or special characters.':'')))return;
+ const snap=window.ttProject.snapshot();snap.projectName=name;
+ const zip=new JSZip();zip.file('PROJECT.json',JSON.stringify(snap));
+ await call('/projects/'+encodeURIComponent(name)+'/backup',{method:'PUT',headers:{'Content-Type':'application/zip'},body:await zip.generateAsync({type:'blob',compression:'DEFLATE'})});
+ info('Published '+name+' backup to cloud.');await refresh();
+}
 const run=fn=>()=>fn().catch(e=>info('Cloud error: '+e.message));el('cloudRefresh').onclick=run(refresh);el('cloudOpen').onclick=run(openCloud);el('cloudDownload').onclick=run(downloadCloudCopy);el('cloudPublish').onclick=run(publish);el('cloudConnect').onclick=run(refresh);el('cloudDisconnect').onclick=()=>info('Auto connection configured in app; restart to reconnect');el('cloudProjectSelect').onchange=()=>{if(el('cloudProjectSelect').value)el('cloudProjectId').value=el('cloudProjectSelect').value};
 el('cloudApi').value=cfg.projectApi;el('cloudProjectId').value=cfg.defaultProject;el('cloudToken').value=cfg.projectToken;
 const boot=()=>refresh().catch(e=>info('Cloud connection failed: '+e.message));if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
