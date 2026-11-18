@@ -2308,4 +2308,21 @@ window.terraTracePythonGIS={
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',reorderManagementPanels);
  else reorderManagementPanels();
 })();
+</script><script>
+/* Hide iPad storage/backup commands without removing underlying code. */
+(function(){
+  function hideBackupSection(){
+    const drawer=document.getElementById('drawer');
+    if(!drawer)return;
+    for(const section of drawer.querySelectorAll('details.tt-section')){
+      const title=section.querySelector(':scope > summary')?.textContent?.trim();
+      if(title==='IPAD STORAGE / BACKUPS'){
+        section.style.setProperty('display','none','important');
+        section.setAttribute('aria-hidden','true');
+      }
+    }
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',hideBackupSection);
+  else hideBackupSection();
+})();
 </script></body></html>
